@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
+using Common;
 
 namespace Day2
 {
@@ -11,7 +10,7 @@ namespace Day2
     {
         public static void Main(string[] args)
         {
-            var passwords = ReadPasswords();
+            var passwords = InputReader.ReadInput("Passwords.txt", LineOperation);
 
             var timer = new Stopwatch();
             timer.Start();
@@ -27,6 +26,19 @@ namespace Day2
             Console.WriteLine($"Part2 time: {timer.Elapsed}");
             Console.WriteLine($"Part 1: {nrValidPasswordsPart1}");
             Console.WriteLine($"Part 2: {nrValidPasswordsPart2}");
+        }
+
+        private static Password LineOperation(string line)
+        {
+            var requirements = line.Split(": ")[0];
+            var pass = line.Split(": ")[1];
+            return new Password
+            {
+                Pass = pass,
+                LowerBound = int.Parse(requirements.Split('-')[0]),
+                UpperBound = int.Parse(requirements.Split('-')[1].Split(' ')[0]),
+                RequiredLetter = requirements.Split(' ')[1][0]
+            };
         }
 
         private static int SecondPart(ImmutableList<Password> passwords)
@@ -59,27 +71,6 @@ namespace Day2
             }
 
             return nrValidPasswordsPart1;
-        }
-
-        private static ImmutableList<Password> ReadPasswords()
-        {
-            var passwordsFile = File.OpenText("Passwords.txt");
-            var passwords = new List<Password>();
-            string line;
-            while ((line = passwordsFile.ReadLine()) != null)
-            {
-                var requirements = line.Split(": ")[0];
-                var pass = line.Split(": ")[1];
-                passwords.Add(new Password
-                {
-                    Pass = pass,
-                    LowerBound = int.Parse(requirements.Split('-')[0]),
-                    UpperBound = int.Parse(requirements.Split('-')[1].Split(' ')[0]),
-                    RequiredLetter = requirements.Split(' ')[1][0]
-                });
-            }
-
-            return passwords.ToImmutableList();
         }
 
         private class Password

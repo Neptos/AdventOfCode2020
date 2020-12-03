@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
+using Common;
 
 namespace Day1
 {
@@ -11,7 +11,7 @@ namespace Day1
     {
         public static void Main(string[] args)
         {
-            var expenses = LoadExpenses();
+            var expenses = InputReader.ReadInput("expenses.txt", int.Parse);
             
             var timer = new Stopwatch();
             timer.Start();
@@ -27,19 +27,6 @@ namespace Day1
             Console.WriteLine($"Part2 time: {timer.Elapsed}");
             Console.WriteLine($"Part1 result: {result1}");
             Console.WriteLine($"Part2 result: {result2}");
-        }
-
-        private static ImmutableList<int> LoadExpenses()
-        {
-            var expensesFile = File.OpenText("expenses.txt");
-            var expenses = new List<int>();
-            string line;
-            while ((line = expensesFile.ReadLine()) != null)
-            {
-                expenses.Add(int.Parse(line));
-            }
-
-            return expenses.ToImmutableList();
         }
 
         private static int SecondPart(ImmutableList<int> expenses)

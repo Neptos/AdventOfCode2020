@@ -23,30 +23,26 @@ namespace Day5
             Console.WriteLine($"Time: {timer.Elapsed}");
 
             timer.Restart();
-            var mySeatId = FindMySeat(seats);
+            var minSeatId = seats.Min(s => s.SeatId);
+            var mySeatId = FindMySeat(seats, minSeatId, maxSeatId);
             timer.Stop();
             
             Console.WriteLine($"My seatId: {mySeatId}");
             Console.WriteLine($"Time: {timer.Elapsed}");
         }
 
-        private static int FindMySeat(List<SeatInfo> seats)
+        private static int FindMySeat(List<SeatInfo> seats, int minSeatId, int maxSeatId)
         {
-            for (var row = 0; row < 128; row++)
+            for (var currentSeatId = minSeatId; currentSeatId < maxSeatId; currentSeatId++)
             {
-                for (var column = 0; column < 8; column++)
+                if (seats.Exists(s => s.SeatId == currentSeatId))
                 {
-                    if (seats.Exists(s => s.Row == row && s.Column == column))
-                    {
-                        continue;
-                    }
-
-                    var seatId = SeatInfo.GetSeatId(row, column);
-                    if (seats.Exists(s => s.SeatId == seatId - 1)
-                        && seats.Exists(s => s.SeatId == seatId + 1))
-                    {
-                        return seatId;
-                    }
+                    continue;
+                }
+                if (seats.Exists(s => s.SeatId == currentSeatId - 1)
+                    && seats.Exists(s => s.SeatId == currentSeatId + 1))
+                {
+                    return currentSeatId;
                 }
             }
 
@@ -57,11 +53,7 @@ namespace Day5
         {
             var rowInfo = boardingPass.Take(7);
             var columnInfo = boardingPass.Skip(7);
-            return new SeatInfo
-            {
-                Row = GetRow(rowInfo),
-                Column = GetColumn(columnInfo)
-            };
+            return new SeatInfo(GetRow(rowInfo), GetColumn(columnInfo));
         }
 
         private static int GetColumn(IEnumerable<char> columnInfo)

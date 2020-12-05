@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Common;
 
@@ -10,31 +11,46 @@ namespace Day5
         public static void Main(string[] args)
         {
             var inputs = InputReader.ReadInput("input.txt", s => s);
+            var seats = inputs.Select(GetSeatInfo).ToList();
 
-            var seats = new List<SeatInfo>();
-            foreach (var input in inputs)
+            var timer = new Stopwatch();
+            
+            timer.Start();
+            var maxSeatId = seats.Max(s => s.SeatId);
+            timer.Stop();
+            
+            Console.WriteLine($"Max seatId: {maxSeatId}");
+            Console.WriteLine($"Time: {timer.Elapsed}");
+
+            timer.Restart();
+            var mySeatId = FindMySeat(seats);
+            timer.Stop();
+            
+            Console.WriteLine($"My seatId: {mySeatId}");
+            Console.WriteLine($"Time: {timer.Elapsed}");
+        }
+
+        private static int FindMySeat(List<SeatInfo> seats)
+        {
+            for (var row = 0; row < 128; row++)
             {
-                seats.Add(GetSeatInfo(input));
-            }
-
-            Console.WriteLine($"Max seatId: {seats.Max(s => s.SeatId)}");
-
-            for (int row = 0; row < 128; row++)
-            {
-                for (int column = 0; column < 8; column++)
+                for (var column = 0; column < 8; column++)
                 {
                     if (seats.Exists(s => s.Row == row && s.Column == column))
                     {
                         continue;
                     }
+
                     var seatId = SeatInfo.GetSeatId(row, column);
                     if (seats.Exists(s => s.SeatId == seatId - 1)
                         && seats.Exists(s => s.SeatId == seatId + 1))
                     {
-                        Console.WriteLine($"My seatId: {seatId}");
+                        return seatId;
                     }
                 }
             }
+
+            return 0;
         }
 
         public static SeatInfo GetSeatInfo(string boardingPass)
@@ -60,7 +76,8 @@ namespace Day5
 
         private static int BinarySearchRange(IEnumerable<char> charsInfo, int upperLimit, char lowerChar)
         {
-            var (lower, upper) = new ValueTuple<int, int>(0, upperLimit);
+            var lower = 0;
+            var upper = upperLimit;
             foreach (var charInfo in charsInfo)
             {
                 if (charInfo == lowerChar)
@@ -74,19 +91,6 @@ namespace Day5
             }
 
             return lower;
-        }
-    }
-
-    internal class SeatInfo
-    {
-        public int Row { get; set; }
-        public int Column { get; set; }
-
-        public int SeatId => GetSeatId(Row, Column);
-
-        public static int GetSeatId(int row, int column)
-        {
-            return row * 8 + column;
         }
     }
 }

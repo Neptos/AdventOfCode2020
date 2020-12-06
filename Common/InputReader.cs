@@ -35,6 +35,8 @@ namespace Common
 
             if (separateOnEmptyLine)
             {
+                // The input doesn't end in an empty line so
+                // when separating on empty line instead of new line we need to add the last line(s)
                 results.Add(lineOperation(outputLine));
             }
 

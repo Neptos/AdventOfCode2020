@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Common;
 
@@ -16,56 +17,43 @@ namespace Day8
                 )
             );
 
-            var accumulator = RunCode(input);
-
-            Console.WriteLine($"Part1: {accumulator}");
-
-            var allJumpLines = input.Where(line => line.GetType() == typeof(JumpCodeLine)).ToList();
-            var allNoOperationLines = input.Where(line => line.GetType() == typeof(NoOperationCodeLine)).ToList();
-            var foundCorrect = false;
-
-            while (!foundCorrect)
-            {
-                try
-                {
-                    var editedInput = input.ToList();
-                    editedInput[editedInput.IndexOf(allJumpLines.First())] = CodeLine.CreateCodeLine("nop", 0);
-                    allJumpLines.Remove(allJumpLines.First());
-                    accumulator = RunCodePart2(editedInput);
-                    foundCorrect = true;
-                }
-                catch (InvalidOperationException)
-                {
-                    // Tried all jump operations
-                    try
-                    {
-                        var editedInput = input.ToList();
-                        editedInput[editedInput.IndexOf(allNoOperationLines.First())] = CodeLine.CreateCodeLine("jmp", allNoOperationLines.First().Argument);
-                        allNoOperationLines.Remove(allNoOperationLines.First());
-                        accumulator = RunCodePart2(editedInput);
-                        foundCorrect = true;
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        // Tried all nop operations
-                        break;
-                    }
-                    catch (Exception)
-                    {
-                        // try again
-                    }
-                }
-                catch (Exception)
-                {
-                    // try again
-                }
-            }
+            var timer = new Stopwatch();
             
-            Console.WriteLine($"Success? {foundCorrect}");
+            timer.Start();
+            var accumulator = RunCode(input).Item1;
+            timer.Stop();
+            
+            Console.WriteLine($"Part1: {accumulator}");
+            Console.WriteLine($"Time: {timer.Elapsed}");
+
+            timer.Restart();
+            var potentiallyCorruptLines = input
+                .Where(line => line.GetType() != typeof(AccumulatorCodeLine))
+                .ToList();
+            var infiniteLoop = true;
+
+            while (infiniteLoop)
+            {
+                var editedInput = input.ToList();
+                var testLine = potentiallyCorruptLines.FirstOrDefault();
+                if (testLine == null)
+                {
+                    Console.WriteLine("Failed to find corrupt line");
+                    break;
+                }
+                editedInput[editedInput.IndexOf(testLine)] = CodeLine.CreateCodeLine(
+                        testLine.GetType() == typeof(JumpCodeLine) ? "nop" : "jmp",
+                        testLine.Argument);
+                potentiallyCorruptLines.Remove(testLine);
+                (accumulator, infiniteLoop) = RunCode(editedInput);
+            }
+            timer.Stop();
+            
             Console.WriteLine($"Part2: {accumulator}");
+            Console.WriteLine($"Time: {timer.Elapsed}");
         }
 
-        private static int RunCodePart2(IReadOnlyList<CodeLine> input)
+        private static (int, bool) RunCode(IReadOnlyList<CodeLine> input)
         {
             foreach (var codeLine in input)
             {
@@ -86,26 +74,7 @@ namespace Day8
                 currentLine = input[currentLineNumber];
             }
 
-            if (infiniteLoop)
-            {
-                throw new Exception("Still looping");
-            }
-
-            return accumulator;
-        }
-
-        private static int RunCode(IReadOnlyList<CodeLine> input)
-        {
-            var accumulator = 0;
-            var currentLine = input[0];
-            var currentLineNumber = 0;
-            while (!currentLine.Visited)
-            {
-                currentLineNumber = currentLine.ExecuteCode(currentLineNumber, ref accumulator);
-                currentLine = input[currentLineNumber];
-            }
-
-            return accumulator;
+            return (accumulator, infiniteLoop);
         }
 
         private abstract class CodeLine

@@ -42,5 +42,12 @@ namespace Common
 
             return results.ToImmutableList();
         }
+
+        public static ImmutableList<T> ReadInput<T>(
+            Func<string, T> lineOperation,
+            bool separateOnEmptyLine = false)
+        {
+            return ReadInput("input.txt", lineOperation, separateOnEmptyLine);
+        }
     }
 }

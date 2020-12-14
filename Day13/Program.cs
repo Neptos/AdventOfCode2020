@@ -42,16 +42,33 @@ namespace Day13
                     .Max(b2 => b2.Item2)).Item1;
             var counter = 0;
             var counterCounter = 0;
-            while (!AllBussesDepartAtTheirIndex(busTable, timestamp, stepIndex))
+            long checkTimestamp;
+            bool cont;
+            while (true)
             {
-                if (counter > 100000000)
+                if (counter > 1000000000)
                 {
                     counterCounter++;
-                    Console.WriteLine($"Currently at: {timestamp} - Time per 100M: {timer.Elapsed/counterCounter}");
+                    Console.WriteLine($"Currently at: {timestamp} - Time per 1B: {timer.Elapsed/counterCounter}");
                     counter = 0;
                 }
                 counter++;
                 timestamp += step;
+                checkTimestamp = timestamp - stepIndex;
+                cont = false;
+                for (var i = 0; i < busTable.Count; i++)
+                {
+                    if ((checkTimestamp + busTable[i].Item1) % busTable[i].Item2 == 0) continue;
+                    cont = true;
+                    break;
+                }
+
+                if (cont)
+                {
+                    continue;
+                }
+
+                break;
             }
             timer.Stop();
 
@@ -59,22 +76,11 @@ namespace Day13
             Console.WriteLine($"Time: {timer.Elapsed}");
         }
 
-        private static Tuple<int, int> SpecialParse(string arg, int index)
+        private static ValueTuple<int, int> SpecialParse(string arg, int index)
         {
             return arg == "x"
-                ? new Tuple<int, int>(index, 0)
-                : new Tuple<int, int>(index, int.Parse(arg));
-        }
-
-        private static bool AllBussesDepartAtTheirIndex(List<Tuple<int, int>> busTable, long timestamp, int maxIndex)
-        {
-            var checkTimestamp = timestamp - maxIndex;
-            foreach (var (index, busId) in busTable)
-            {
-                if ((checkTimestamp + index) % busId != 0) return false;
-            }
-
-            return true;
+                ? ValueTuple.Create(index, 0)
+                : ValueTuple.Create(index, int.Parse(arg));
         }
 
         private static int Part1(int earliestDepartTime, List<int> filteredBusTable)

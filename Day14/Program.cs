@@ -31,7 +31,7 @@ namespace Day14
 
         private static long Part2(ImmutableList<string> input)
         {
-            var memory = new List<Tuple<long, long>>();
+            var memory = new Dictionary<long, long>();
             var orMask = "";
             var mask = "";
             
@@ -62,18 +62,13 @@ namespace Day14
                             xIndex = mask.IndexOf('X', xIndex+1);
                             newAddress = ReplaceBinaryChar(newAddress, mask.Length - xIndex - 1, character);
                         }
-                        
-                        if (memory.Any(m => m.Item1 == newAddress))
-                        {
-                            memory.Remove(memory.First(m => m.Item1 == newAddress));
-                        }
 
-                        memory.Add(new Tuple<long, long>(newAddress, value));
+                        memory[newAddress] = value;
                     }
                 }
             }
 
-            return memory.Sum(m => m.Item2);
+            return memory.Sum(pair => pair.Value);
         }
         
         private static List<List<T>> GetPermutationsWithRepetition<T>(IReadOnlyCollection<T> list, int length)

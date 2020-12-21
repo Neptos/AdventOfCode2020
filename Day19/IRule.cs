@@ -7,6 +7,6 @@ namespace Day19
     {
         string Index { get; set; }
         string StringContent { get; set; }
-        Tuple<bool, string> RunCheck(string input, IEnumerable<IRule> rulesList);
+        Tuple<bool, Tuple<string, string>> RunCheck(string input, IEnumerable<IRule> rulesList, List<string> rulesUsed);
     }
 }
